@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>POS كامل</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .pos {
+      background: white;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+    ul {
+      padding: 0;
+      list-style: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pos">
+    <h2>نقطة بيع</h2>
+
+    <select id="product">
+      <option value="10">مياه - 10</option>
+      <option value="15">عصير - 15</option>
+      <option value="20">شيكولاتة - 20</option>
+    </select>
+
+    <button onclick="addItem()">إضافة للسلة</button>
+
+    <h3>الفاتورة</h3>
+    <ul id="cart"></ul>
+
+    <h3>الإجمالي: <span id="total">0</span> جنيه</h3>
+    <button onclick="clearCart()">مسح</button>
+  </div>
+
+  <script>
+    let total = 0;
+
+    function addItem() {
+      const select = document.getElementById("product");
+      const price = Number(select.value);
+      const name = select.options[select.selectedIndex].text;
+
+      total += price;
+      document.getElementById("total").innerText = total;
+
+      const li = document.createElement("li");
+      li.innerText = name;
+      document.getElementById("cart").appendChild(li);
+    }
+
+    function clearCart() {
+      total = 0;
+      document.getElementById("total").innerText = 0;
+      document.getElementById("cart").innerHTML = "";
+    }
+  </script>
+
+</body>
+</html>
