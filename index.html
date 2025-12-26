@@ -2,7 +2,11 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>POS + تقارير</title>
+  <title>POS System</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+
   <style>
     body {
       font-family: Arial;
@@ -10,13 +14,13 @@
       padding: 20px;
       direction: rtl;
     }
-    .pos {
+    .pos, .report {
       background: #fff;
       padding: 20px;
       max-width: 450px;
       margin: auto;
       border-radius: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     select, input, button {
       width: 100%;
@@ -32,13 +36,6 @@
       justify-content: space-between;
       border-bottom: 1px solid #ddd;
       padding: 5px 0;
-    }
-    .report {
-      background: #fff;
-      padding: 15px;
-      max-width: 450px;
-      margin: auto;
-      border-radius: 8px;
     }
     .success {
       background: #27ae60;
@@ -61,7 +58,7 @@
     <option value="20">شيكولاتة - 20</option>
   </select>
 
-  <input type="number" id="qty" value="1" min="1">
+  <input type="number" id="qty" value="1" min="1" placeholder="الكمية">
 
   <button onclick="addItem()">➕ إضافة</button>
 
@@ -83,9 +80,11 @@
 </div>
 
 <script>
+  // بيانات الفاتورة
   let cart = [];
   let discount = 0;
 
+  // تقرير اليوم (محفوظ)
   let report = JSON.parse(localStorage.getItem("report")) || {
     count: 0,
     total: 0
@@ -98,6 +97,11 @@
     const qty = Number(document.getElementById("qty").value);
 
     cart.push({ name, price, qty });
+    render();
+  }
+
+  function removeItem(index) {
+    cart.splice(index, 1);
     render();
   }
 
@@ -120,11 +124,6 @@
 
     discount = Number(document.getElementById("discount").value);
     document.getElementById("total").innerText = total - discount;
-  }
-
-  function removeItem(i) {
-    cart.splice(i, 1);
-    render();
   }
 
   function clearCart() {
@@ -152,6 +151,13 @@
   }
 
   updateReport();
+</script>
+
+<!-- تسجيل Service Worker -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
 </script>
 
 </body>
