@@ -2,8 +2,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>POS كامل</title>
-
+  <title>POS + تقارير</title>
   <style>
     body {
       font-family: Arial;
@@ -14,9 +13,10 @@
     .pos {
       background: #fff;
       padding: 20px;
-      max-width: 420px;
+      max-width: 450px;
       margin: auto;
       border-radius: 8px;
+      margin-bottom: 20px;
     }
     select, input, button {
       width: 100%;
@@ -33,12 +33,19 @@
       border-bottom: 1px solid #ddd;
       padding: 5px 0;
     }
-    .danger {
-      background: #e74c3c;
-      color: white;
+    .report {
+      background: #fff;
+      padding: 15px;
+      max-width: 450px;
+      margin: auto;
+      border-radius: 8px;
     }
     .success {
       background: #27ae60;
+      color: white;
+    }
+    .danger {
+      background: #c0392b;
       color: white;
     }
   </style>
@@ -54,24 +61,35 @@
     <option value="20">شيكولاتة - 20</option>
   </select>
 
-  <input type="number" id="qty" value="1" min="1" placeholder="الكمية">
+  <input type="number" id="qty" value="1" min="1">
 
   <button onclick="addItem()">➕ إضافة</button>
 
   <h3>الفاتورة</h3>
   <ul id="cart"></ul>
 
-  <input type="number" id="discount" placeholder="خصم (جنيه)" value="0">
+  <input type="number" id="discount" placeholder="خصم" value="0">
 
   <h3>الإجمالي: <span id="total">0</span> جنيه</h3>
 
-  <button class="success" onclick="printInvoice()">🖨️ طباعة</button>
+  <button class="success" onclick="finishSale()">✅ إنهاء البيع</button>
   <button class="danger" onclick="clearCart()">🗑️ مسح</button>
+</div>
+
+<div class="report">
+  <h3>📊 تقرير اليوم</h3>
+  <p>عدد الفواتير: <span id="salesCount">0</span></p>
+  <p>إجمالي المبيعات: <span id="salesTotal">0</span> جنيه</p>
 </div>
 
 <script>
   let cart = [];
-  let total = 0;
+  let discount = 0;
+
+  let report = JSON.parse(localStorage.getItem("report")) || {
+    count: 0,
+    total: 0
+  };
 
   function addItem() {
     const product = document.getElementById("product");
@@ -79,50 +97,61 @@
     const name = product.options[product.selectedIndex].text;
     const qty = Number(document.getElementById("qty").value);
 
-    const itemTotal = price * qty;
-
-    cart.push({ name, qty, itemTotal });
-    renderCart();
+    cart.push({ name, price, qty });
+    render();
   }
 
-  function removeItem(index) {
-    cart.splice(index, 1);
-    renderCart();
-  }
+  function render() {
+    const list = document.getElementById("cart");
+    list.innerHTML = "";
+    let total = 0;
 
-  function renderCart() {
-    const cartList = document.getElementById("cart");
-    cartList.innerHTML = "";
-    total = 0;
-
-    cart.forEach((item, index) => {
-      total += item.itemTotal;
+    cart.forEach((item, i) => {
+      const itemTotal = item.price * item.qty;
+      total += itemTotal;
 
       const li = document.createElement("li");
       li.innerHTML = `
-        ${item.name} × ${item.qty} = ${item.itemTotal}
-        <button onclick="removeItem(${index})">❌</button>
+        ${item.name} × ${item.qty} = ${itemTotal}
+        <button onclick="removeItem(${i})">❌</button>
       `;
-      cartList.appendChild(li);
+      list.appendChild(li);
     });
 
-    const discount = Number(document.getElementById("discount").value);
+    discount = Number(document.getElementById("discount").value);
     document.getElementById("total").innerText = total - discount;
+  }
+
+  function removeItem(i) {
+    cart.splice(i, 1);
+    render();
   }
 
   function clearCart() {
     cart = [];
-    total = 0;
-    document.getElementById("cart").innerHTML = "";
-    document.getElementById("total").innerText = 0;
     document.getElementById("discount").value = 0;
+    render();
   }
 
-  function printInvoice() {
-    window.print();
+  function finishSale() {
+    const total = Number(document.getElementById("total").innerText);
+    if (total <= 0) return;
+
+    report.count += 1;
+    report.total += total;
+
+    localStorage.setItem("report", JSON.stringify(report));
+
+    clearCart();
+    updateReport();
   }
 
-  document.getElementById("discount").addEventListener("input", renderCart);
+  function updateReport() {
+    document.getElementById("salesCount").innerText = report.count;
+    document.getElementById("salesTotal").innerText = report.total;
+  }
+
+  updateReport();
 </script>
 
 </body>
