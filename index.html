@@ -2,12 +2,14 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>POS كامل</title>
+  <title>POS كامل بالكميات</title>
+
   <style>
     body {
       font-family: Arial;
       background: #f5f5f5;
       padding: 20px;
+      direction: rtl;
     }
     .pos {
       background: white;
@@ -16,7 +18,7 @@
       margin: auto;
       border-radius: 8px;
     }
-    button {
+    select, input, button {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -24,6 +26,10 @@
     ul {
       padding: 0;
       list-style: none;
+    }
+    li {
+      border-bottom: 1px solid #ddd;
+      padding: 5px 0;
     }
   </style>
 </head>
@@ -38,28 +44,35 @@
       <option value="20">شيكولاتة - 20</option>
     </select>
 
+    <input type="number" id="qty" value="1" min="1" placeholder="الكمية">
+
     <button onclick="addItem()">إضافة للسلة</button>
 
     <h3>الفاتورة</h3>
     <ul id="cart"></ul>
 
     <h3>الإجمالي: <span id="total">0</span> جنيه</h3>
-    <button onclick="clearCart()">مسح</button>
+
+    <button onclick="clearCart()">مسح الفاتورة</button>
   </div>
 
   <script>
     let total = 0;
 
     function addItem() {
-      const select = document.getElementById("product");
-      const price = Number(select.value);
-      const name = select.options[select.selectedIndex].text;
+      const product = document.getElementById("product");
+      const price = Number(product.value);
+      const name = product.options[product.selectedIndex].text;
 
-      total += price;
+      const qty = Number(document.getElementById("qty").value);
+
+      const itemTotal = price * qty;
+      total += itemTotal;
+
       document.getElementById("total").innerText = total;
 
       const li = document.createElement("li");
-      li.innerText = name;
+      li.innerText = `${name} × ${qty} = ${itemTotal} جنيه`;
       document.getElementById("cart").appendChild(li);
     }
 
