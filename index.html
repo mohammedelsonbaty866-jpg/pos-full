@@ -2,19 +2,19 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>POS كامل بالكميات</title>
+  <title>POS كامل</title>
 
   <style>
     body {
       font-family: Arial;
-      background: #f5f5f5;
+      background: #f2f2f2;
       padding: 20px;
       direction: rtl;
     }
     .pos {
-      background: white;
+      background: #fff;
       padding: 20px;
-      max-width: 400px;
+      max-width: 420px;
       margin: auto;
       border-radius: 8px;
     }
@@ -24,64 +24,106 @@
       margin-top: 5px;
     }
     ul {
-      padding: 0;
       list-style: none;
+      padding: 0;
     }
     li {
+      display: flex;
+      justify-content: space-between;
       border-bottom: 1px solid #ddd;
       padding: 5px 0;
+    }
+    .danger {
+      background: #e74c3c;
+      color: white;
+    }
+    .success {
+      background: #27ae60;
+      color: white;
     }
   </style>
 </head>
 <body>
 
-  <div class="pos">
-    <h2>نقطة بيع</h2>
+<div class="pos">
+  <h2>🧾 نقطة بيع</h2>
 
-    <select id="product">
-      <option value="10">مياه - 10</option>
-      <option value="15">عصير - 15</option>
-      <option value="20">شيكولاتة - 20</option>
-    </select>
+  <select id="product">
+    <option value="10">مياه - 10</option>
+    <option value="15">عصير - 15</option>
+    <option value="20">شيكولاتة - 20</option>
+  </select>
 
-    <input type="number" id="qty" value="1" min="1" placeholder="الكمية">
+  <input type="number" id="qty" value="1" min="1" placeholder="الكمية">
 
-    <button onclick="addItem()">إضافة للسلة</button>
+  <button onclick="addItem()">➕ إضافة</button>
 
-    <h3>الفاتورة</h3>
-    <ul id="cart"></ul>
+  <h3>الفاتورة</h3>
+  <ul id="cart"></ul>
 
-    <h3>الإجمالي: <span id="total">0</span> جنيه</h3>
+  <input type="number" id="discount" placeholder="خصم (جنيه)" value="0">
 
-    <button onclick="clearCart()">مسح الفاتورة</button>
-  </div>
+  <h3>الإجمالي: <span id="total">0</span> جنيه</h3>
 
-  <script>
-    let total = 0;
+  <button class="success" onclick="printInvoice()">🖨️ طباعة</button>
+  <button class="danger" onclick="clearCart()">🗑️ مسح</button>
+</div>
 
-    function addItem() {
-      const product = document.getElementById("product");
-      const price = Number(product.value);
-      const name = product.options[product.selectedIndex].text;
+<script>
+  let cart = [];
+  let total = 0;
 
-      const qty = Number(document.getElementById("qty").value);
+  function addItem() {
+    const product = document.getElementById("product");
+    const price = Number(product.value);
+    const name = product.options[product.selectedIndex].text;
+    const qty = Number(document.getElementById("qty").value);
 
-      const itemTotal = price * qty;
-      total += itemTotal;
+    const itemTotal = price * qty;
 
-      document.getElementById("total").innerText = total;
+    cart.push({ name, qty, itemTotal });
+    renderCart();
+  }
+
+  function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+  }
+
+  function renderCart() {
+    const cartList = document.getElementById("cart");
+    cartList.innerHTML = "";
+    total = 0;
+
+    cart.forEach((item, index) => {
+      total += item.itemTotal;
 
       const li = document.createElement("li");
-      li.innerText = `${name} × ${qty} = ${itemTotal} جنيه`;
-      document.getElementById("cart").appendChild(li);
-    }
+      li.innerHTML = `
+        ${item.name} × ${item.qty} = ${item.itemTotal}
+        <button onclick="removeItem(${index})">❌</button>
+      `;
+      cartList.appendChild(li);
+    });
 
-    function clearCart() {
-      total = 0;
-      document.getElementById("total").innerText = 0;
-      document.getElementById("cart").innerHTML = "";
-    }
-  </script>
+    const discount = Number(document.getElementById("discount").value);
+    document.getElementById("total").innerText = total - discount;
+  }
+
+  function clearCart() {
+    cart = [];
+    total = 0;
+    document.getElementById("cart").innerHTML = "";
+    document.getElementById("total").innerText = 0;
+    document.getElementById("discount").value = 0;
+  }
+
+  function printInvoice() {
+    window.print();
+  }
+
+  document.getElementById("discount").addEventListener("input", renderCart);
+</script>
 
 </body>
 </html>
